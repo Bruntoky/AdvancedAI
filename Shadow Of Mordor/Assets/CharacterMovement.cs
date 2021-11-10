@@ -6,8 +6,9 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
+
     // Start is called before the first frame update
-    public float speed = 7.5f;// grounded movement speed
+    public float speed = 1f;// grounded movement speed
     public float jumpSpeed = 8.0f;//movement speed while in the air
     public float gravity = 20.0f;//speed at which you fall
     public Transform playerCameraParent;//camera linked to player
@@ -17,6 +18,7 @@ public class CharacterMovement : MonoBehaviour
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;//direction your moving
     Vector2 rotation = Vector2.zero;//direction your looking
+    public Animator anim;
 
     [HideInInspector]
     public bool canMove = true;
@@ -29,6 +31,9 @@ public class CharacterMovement : MonoBehaviour
 
     void Update()
     {
+        //Debug.Log(Input.GetAxis("Vertical"));
+        anim.SetFloat("vertical", Input.GetAxis("Vertical"));
+        anim.SetFloat("horizontal", Input.GetAxis("Horizontal"));
         if (characterController.isGrounded)
         {
             // If we are grounded, so recalculate move direction based on axes
@@ -54,7 +59,7 @@ public class CharacterMovement : MonoBehaviour
         // Move the character
         characterController.Move(moveDirection * Time.deltaTime);
 
-        // Player and Camera rotation
+        // Camera rotation
         if (canMove)
         {
             rotation.y += Input.GetAxis("Mouse X") * lookSpeed;

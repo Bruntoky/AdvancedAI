@@ -10,7 +10,7 @@ namespace NodeCanvas.Tasks.Actions
     [Category("Movement/Pathfinding")]
     public class MoveToGameObject : ActionTask<NavMeshAgent>
     {
-
+        public Animator anim;
         [RequiredField]
         public BBParameter<GameObject> target;
         public BBParameter<float> speed = 4;
@@ -34,8 +34,11 @@ namespace NodeCanvas.Tasks.Actions
         protected override void OnUpdate() {
             if ( target.value == null ) { EndAction(false); return; }
             var pos = target.value.transform.position;
+            anim.SetFloat("vertical", 1);
+            
             if ( lastRequest != pos ) {
                 if ( !agent.SetDestination(pos) ) {
+                    anim.SetFloat("vertical", 0);
                     EndAction(false);
                     return;
                 }
