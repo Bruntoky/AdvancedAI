@@ -14,11 +14,14 @@ public class CharacterMovement : MonoBehaviour
     public Transform playerCameraParent;//camera linked to player
     public float lookSpeed = 2.0f;//speed the camera rotates
     public float lookXLimit = 60.0f;//maximum angle you can look to your sides
-
+    private bool Jumping = false;
+    private bool Sprinting = false;
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;//direction your moving
     Vector2 rotation = Vector2.zero;//direction your looking
     public Animator anim;
+    private float curSpeedX ;
+    private float curSpeedY ;
 
     [HideInInspector]
     public bool canMove = true;
@@ -31,23 +34,48 @@ public class CharacterMovement : MonoBehaviour
 
     void Update()
     {
+        
+        if (Input.GetButtonDown("Dash"))
+        {
+            Sprinting = true;
+        }
+        if(Input.GetButtonUp("Dash"))
+        {
+            Sprinting = false;
+        }
         //Debug.Log(Input.GetAxis("Vertical"));
         anim.SetFloat("vertical", Input.GetAxis("Vertical"));
         anim.SetFloat("horizontal", Input.GetAxis("Horizontal"));
+        anim.SetBool("sprinting", Sprinting);
         if (characterController.isGrounded)
         {
+            Jumping = false;
+            anim.SetBool("jumping", Jumping);
             // If we are grounded, so recalculate move direction based on axes
             Vector3 forward = transform.TransformDirection(Vector3.forward);
             Vector3 right = transform.TransformDirection(Vector3.right);
             //set move speed
-            float curSpeedX = canMove ? speed * Input.GetAxis("Vertical") : 0;
-            float curSpeedY = canMove ? speed * Input.GetAxis("Horizontal") : 0;
+            if(Sprinting)
+            {
+                curSpeedX = canMove ? (speed * 2) * Input.GetAxis("Vertical") : 0;
+                curSpeedY = canMove ? (speed * 2) * Input.GetAxis("Horizontal") : 0;
+            }
+            else
+            {
+                curSpeedX = canMove ? speed * Input.GetAxis("Vertical") : 0;
+                curSpeedY = canMove ? speed * Input.GetAxis("Horizontal") : 0;
+            }
+            
             //sets movement direction
             moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-            if (Input.GetButton("Jump") && canMove)
+            if (Input.GetButton("Jump") && canMove && (Sprinting = false))
             {
+                Jumping = true;
+                anim.SetBool("jumping", Jumping);
                 moveDirection.y = jumpSpeed;//makes the character move up
+                
+                
             }
         }
 
