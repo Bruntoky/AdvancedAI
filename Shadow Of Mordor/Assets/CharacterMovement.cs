@@ -14,15 +14,17 @@ public class CharacterMovement : MonoBehaviour
     public Transform playerCameraParent;//camera linked to player
     public float lookSpeed = 2.0f;//speed the camera rotates
     public float lookXLimit = 60.0f;//maximum angle you can look to your sides
-    private bool Jumping = false;
-    private bool Sprinting = false;
+    private bool Jumping = false;//jumping animation bool
+    private bool Sprinting = false;//sprinting animation bool
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;//direction your moving
     Vector2 rotation = Vector2.zero;//direction your looking
-    public Animator anim;
+
+    public Animator anim;//reference to the animator
     private float curSpeedX ;
     private float curSpeedY ;
-
+    private bool Attack;//attack aniamtion bool
+    public BoxCollider Sword;//reference to swords collider
     [HideInInspector]
     public bool canMove = true;
 
@@ -30,20 +32,31 @@ public class CharacterMovement : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         rotation.y = transform.eulerAngles.y;//ensures facing angle is correct
+        Sword.enabled = false;//turns off the swords collider
     }
 
     void Update()
     {
         
-        if (Input.GetButtonDown("Dash"))
+        if (Input.GetButtonDown("Dash"))//if you press shift switch to sprinting
         {
             Sprinting = true;
         }
-        if(Input.GetButtonUp("Dash"))
+        if(Input.GetButtonUp("Dash"))//when you let go of sprint stop sprinting
         {
             Sprinting = false;
         }
-        //Debug.Log(Input.GetAxis("Vertical"));
+        if(Input.GetMouseButtonDown(0))//when you left click start the attack animationa and turn on the collider
+        {
+            Attack = true;
+            Sword.enabled = true;
+            StartCoroutine (attackDelay());
+            anim.SetBool("attack", Attack);
+
+        }
+       
+      
+        //sets animation values
         anim.SetFloat("vertical", Input.GetAxis("Vertical"));
         anim.SetFloat("horizontal", Input.GetAxis("Horizontal"));
         anim.SetBool("sprinting", Sprinting);
@@ -52,10 +65,8 @@ public class CharacterMovement : MonoBehaviour
             Jumping = false;
             anim.SetBool("jumping", Jumping);
             // If we are grounded, so recalculate move direction based on axes
-            Vector3 forward = transform.TransformDirection(Vector3.forward);
-            Vector3 right = transform.TransformDirection(Vector3.right);
             //set move speed
-            if(Sprinting)
+            if (Sprinting)
             {
                 curSpeedX = canMove ? (speed * 2) * Input.GetAxis("Vertical") : 0;
                 curSpeedY = canMove ? (speed * 2) * Input.GetAxis("Horizontal") : 0;
@@ -67,9 +78,9 @@ public class CharacterMovement : MonoBehaviour
             }
             
             //sets movement direction
-            moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+            moveDirection = (transform.forward * curSpeedX) + (transform.right * curSpeedY);
 
-            if (Input.GetButton("Jump") && canMove && (Sprinting = false))
+            if (Input.GetButton("Jump") && canMove && (Sprinting == false))
             {
                 Jumping = true;
                 anim.SetBool("jumping", Jumping);
@@ -87,14 +98,24 @@ public class CharacterMovement : MonoBehaviour
         // Move the character
         characterController.Move(moveDirection * Time.deltaTime);
 
-        // Camera rotation
+        // Camera rotation editing movement
         if (canMove)
         {
             rotation.y += Input.GetAxis("Mouse X") * lookSpeed;
             rotation.x += -Input.GetAxis("Mouse Y") * lookSpeed;
             rotation.x = Mathf.Clamp(rotation.x, -lookXLimit, lookXLimit);
             playerCameraParent.localRotation = Quaternion.Euler(rotation.x, 0, 0);
-            transform.eulerAngles = new Vector2(0, rotation.y);
+            transform.eulerAngles = new Vector3(0, rotation.y, 0);
         }
+    }
+
+
+    private IEnumerator attackDelay()//turns off the sword collider after the animation runs
+    {
+        
+        yield return new WaitForSeconds(1.5f);
+        Sword.enabled = false;
+        Attack = false;//stop the attack animation
+        anim.SetBool("attack", Attack);
     }
 }
