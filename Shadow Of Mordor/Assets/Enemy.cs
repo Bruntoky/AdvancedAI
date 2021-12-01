@@ -9,7 +9,7 @@ public class Enemy : MonoBehaviour
     public bool Dead;// animation bool for dying
     public Animator anim; //reference to the animator
     public Transform playerLocation;
-   
+    public GameObject player;
 
     // Update is called once per frame
     void Update()
