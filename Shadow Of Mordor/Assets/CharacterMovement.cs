@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 [RequireComponent(typeof(CharacterController))]
 
 public class CharacterMovement : MonoBehaviour
@@ -27,6 +27,8 @@ public class CharacterMovement : MonoBehaviour
     public BoxCollider Sword;//reference to swords collider
     [HideInInspector]
     public bool canMove = true;
+    public int health = 100;
+    public bool Dead;// animation bool for dying
 
     void Start()
     {
@@ -107,15 +109,37 @@ public class CharacterMovement : MonoBehaviour
             playerCameraParent.localRotation = Quaternion.Euler(rotation.x, 0, 0);
             transform.eulerAngles = new Vector3(0, rotation.y, 0);
         }
+
+        if (health <= 0)//if health is below 0 set animation to dead
+        {
+            Dead = true;
+            anim.SetBool("dead", Dead);
+            StartCoroutine(restart());
+        }
     }
 
 
     private IEnumerator attackDelay()//turns off the sword collider after the animation runs
     {
         
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(2f);
         Sword.enabled = false;
         Attack = false;//stop the attack animation
         anim.SetBool("attack", Attack);
+    }
+    private void OnTriggerEnter(Collider collider)//lower health on hit
+    {
+        if (collider.tag == "Enemy")
+        {
+
+            health -= 20;
+        }
+    }
+    private IEnumerator restart()//turns off the sword collider after the animation runs
+    {
+
+        yield return new WaitForSeconds(3f);
+        SceneManager.LoadScene(0);
+        
     }
 }

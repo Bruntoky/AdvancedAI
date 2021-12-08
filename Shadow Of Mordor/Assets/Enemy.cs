@@ -8,8 +8,11 @@ public class Enemy : MonoBehaviour
     public int health = 100;
     public bool Dead;// animation bool for dying
     public Animator anim; //reference to the animator
-    public Transform playerLocation;
     public GameObject player;
+    public Transform playerLocation;
+ 
+    public bool CanAttack;
+    public bool InRange;
 
     // Update is called once per frame
     void Update()
@@ -23,6 +26,9 @@ public class Enemy : MonoBehaviour
     }
     private void OnTriggerEnter(Collider collider)//lower health on hit
     {
-        health -= 20;
+        if (collider.tag == "Player")
+        {
+            health -= 20;
+        }
     }
 }
